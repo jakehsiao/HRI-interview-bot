@@ -9,10 +9,10 @@ ROBOT_IP = "127.0.0.1"
 PORT = 9559
 
 # 语音与静默检测参数
-GLOBAL_SENSITIVITY = 0.8       # 声音检测灵敏度
-SILENCE_THRESHOLD = 0.3        # 判定为“停顿”的秒数
-SILENCE_TIMEOUT = 2.0          # 判定为“说话结束”的秒数
-FEEDBACK_COOLDOWN = 1.5        # 两次反馈之间的最小间隔（秒）
+GLOBAL_SENSITIVITY = 0.9       # 声音检测灵敏度
+SILENCE_THRESHOLD = 0.2        # 判定为“停顿”的秒数
+SILENCE_TIMEOUT = 3.0          # 判定为“说话结束”的秒数
+FEEDBACK_COOLDOWN = 2.0        # 两次反馈之间的最小间隔（秒）
 
 # 识别配置
 ASR_CONFIDENCE_THRESHOLD = 0.4 # 语音识别置信度阈值
@@ -23,6 +23,7 @@ class NaoInterviewer:
         self.ip = ip
         self.port = port
         self.last_feedback_time = 0
+        self.word_id = 0
         
         try:
             # 初始化代理
@@ -80,7 +81,7 @@ class NaoInterviewer:
         self.listen_for_silence()
 
         # 优势询问环节
-        self.tts.say("^start(animations/Stand/Gestures/Ask_1) Good, so what are your greatest strengths?")
+        self.tts.say("^start(animations/Stand/Gestures/Ask_1) Good, so what can you do for our company?")
         self.listen_for_silence()
         
         self.end_process()
@@ -116,6 +117,8 @@ class NaoInterviewer:
                     is_speaking = False
                     if current_time - self.last_feedback_time > FEEDBACK_COOLDOWN:
                         self.trigger_feedback()
+                        # print "Current time:", current_time
+                        # print "Last feedback:", self.last_feedback_time
                         self.last_feedback_time = current_time
                 
                 # 判定为完全结束
@@ -132,7 +135,7 @@ class NaoInterviewer:
 
     def trigger_feedback(self):
         """ 随机点头并给出口头反馈 """
-        phrases = ["Well", "Okay", "Hmmm", "I Know"]
+        phrases = ["Well", "Aha", "Yeah", "I Know", "Oh", "Tell me more", "Good", "Oh Yeah"]
         chosen_phrase = random.choice(phrases)
         print "Robot feedback: " + chosen_phrase
         
@@ -161,7 +164,7 @@ class NaoInterviewer:
 
     def end_process(self):
         """ 结束面试并休息 """
-        self.tts.say("^start(animations/Stand/Gestures/BowShort_1) Thank you for your time, have a nice day!")
+        self.tts.say("^start(animations/Stand/Gestures/BowShort_1) Thank you for your interview, have a nice day!")
         self.motion.rest()
         print "Interview ended."
 
