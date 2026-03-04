@@ -28,6 +28,8 @@ class NaoInterviewer:
         try:
             # 初始化代理
             self.tts = ALProxy("ALAnimatedSpeech", self.ip, self.port)
+            self.tts2 = ALProxy("ALTextToSpeech", self.ip, self.port)
+            self.tts2.setLanguage("English")
             self.asr = ALProxy("ALSpeechRecognition", self.ip, self.port)
             self.mem = ALProxy("ALMemory", self.ip, self.port)
             self.motion = ALProxy("ALMotion", self.ip, self.port)
@@ -81,7 +83,7 @@ class NaoInterviewer:
         self.listen_for_silence()
 
         # 优势询问环节
-        self.tts.say("^start(animations/Stand/Gestures/Ask_1) Good, so what can you do for our company?")
+        self.tts.say("^start(animations/Stand/Gestures/Ask_1) Good, it's clear that you're a strong candidate. so what can you do for our company?")
         self.listen_for_silence()
         
         self.end_process()
@@ -135,7 +137,7 @@ class NaoInterviewer:
 
     def trigger_feedback(self):
         """ 随机点头并给出口头反馈 """
-        phrases = ["Well", "Aha", "Yeah", "I Know", "Oh", "Tell me more", "Good", "Oh Yeah"]
+        phrases = ["Well", "Aha", "Yeah", "I Know", "Oh", "Tell me more", "Good", "Oh Yeah", "Emmm"]
         chosen_phrase = random.choice(phrases)
         print "Robot feedback: " + chosen_phrase
         
@@ -164,6 +166,12 @@ class NaoInterviewer:
 
     def end_process(self):
         """ 结束面试并休息 """
+        txt = "AAA"
+        while txt != "":
+            # txt = raw_input("Enter the text:").decode("utf-8").encode("utf-8")
+            txt = raw_input("Enter the text:")
+            print txt
+            self.tts.say(txt)
         self.tts.say("^start(animations/Stand/Gestures/BowShort_1) Thank you for your interview, have a nice day!")
         self.motion.rest()
         print "Interview ended."
