@@ -12,9 +12,9 @@ PORT = 9559
 
 # 语音与静默检测参数
 GLOBAL_SENSITIVITY = 0.9       # 声音检测灵敏度
-SILENCE_THRESHOLD = 0.2        # 判定为“停顿”的秒数
-SILENCE_TIMEOUT = 3.0          # 判定为“说话结束”的秒数
-FEEDBACK_COOLDOWN = 2.0        # 两次反馈之间的最小间隔（秒）
+SILENCE_THRESHOLD = 0.3        # 判定为“停顿”的秒数
+SILENCE_TIMEOUT = 3.5          # 判定为“说话结束”的秒数
+FEEDBACK_COOLDOWN = 3.5        # 两次反馈之间的最小间隔（秒）
 
 # 识别配置
 ASR_CONFIDENCE_THRESHOLD = 0.4 # 语音识别置信度阈值
