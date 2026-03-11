@@ -3,6 +3,8 @@ import sys
 import time
 import random
 from naoqi import ALProxy
+import urllib2
+import json
 
 # --- 全局配置常量 ---
 ROBOT_IP = "127.0.0.1"
@@ -83,7 +85,7 @@ class NaoInterviewer:
         self.listen_for_silence()
 
         # 优势询问环节
-        self.tts.say("^start(animations/Stand/Gestures/Ask_1) Good, it's clear that you're a strong candidate. so what can you do for our company?")
+        self.tts.say("^start(animations/Stand/Gestures/Ask_1) Good, it's clear that you're a strong candidate. so tell me a project you are working on recently, what is the project? What have you done in it?")
         self.listen_for_silence()
         
         self.end_process()
@@ -163,15 +165,54 @@ class NaoInterviewer:
 
         self.asr.unsubscribe("InterviewerApp")
         return detected_word
+    
+    def read_feedback(self):
+        feedback_text = ""
+        try:
+            print "Fetching feedback from LLM API..."
+            # 使用 urllib2 发起 GET 请求，设置严格的 2 秒超时
+            response = urllib2.urlopen("http://127.0.0.1:3005/get_feedback", timeout=2.0)
+            result = json.loads(response.read())
+            
+            # 判断返回值状态和内容
+            if result.get("status") == "success" and result.get("feedback"):
+                # 将 unicode 转换为普通 string，防止 NAO 的 TTS 报错
+                feedback_text = str(result.get("feedback"))
+                print "Success: Feedback received."
+            else:
+                print "Warning: API returned empty or unsuccessful status."
+                
+        except urllib2.URLError as e:
+            print "API Timeout or Connection Refused: ", e
+        except Exception as e:
+            print "Unexpected Error parsing feedback: ", e
+
+        # 如果报错、超时或结果为空，给定一个兜底的默认反馈
+        if not feedback_text:
+            fallbacks = [
+                "Overall, you presented your ideas clearly and showed great confidence during our conversation today.",
+                "I am impressed by your professional attitude. You addressed the core of my questions with a very structured approach.",
+                "You have a strong way of expressing your thoughts. Your background seems to align well with many of our requirements.",
+                "Thank you for sharing those insights. Your communication skills are solid, and you maintain a good pace throughout the interview.",
+                "Based on what you've shared, you clearly have a good grasp of your field and can articulate your value effectively."
+            ]
+            # 随机挑选一个
+            feedback_text = random.choice(fallbacks)
+        # 让 NAO 读出反馈内容
+        self.tts.say(feedback_text)
 
     def end_process(self):
-        """ 结束面试并休息 """
-        txt = "AAA"
-        while txt != "":
-            # txt = raw_input("Enter the text:").decode("utf-8").encode("utf-8")
-            txt = raw_input("Enter the text:")
-            print txt
-            self.tts.say(txt)
+        """ 结束面试给出反馈 并休息 """
+        # txt = "AAA"
+        # while txt != "":
+        #     # txt = raw_input("Enter the text:").decode("utf-8").encode("utf-8")
+        #     txt = raw_input("Enter the text:")
+        #     print txt
+        #     self.tts.say(txt)
+        #     self.tts.say(txt)
+        self.tts.say("^start(animations/Stand/Gestures/Explain_1) Thank you for your interview, here is a detailed feedback on what I think about your answers.")
+        self.read_feedback()
+        self.read_feedback()
         self.tts.say("^start(animations/Stand/Gestures/BowShort_1) Thank you for your interview, have a nice day!")
         self.motion.rest()
         print "Interview ended."
