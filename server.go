@@ -150,7 +150,7 @@ func llmWorker(taskChan <-chan string, queue *FeedbackQueue, sfKey string) {
 Task: Evaluate the transcript in exactly 3 short sentences.
 Rules:
 1. NO thinking process. NO preamble. NO bolding.
-2. Sentence 1: Summarize the answer. Start with "For this question".
+2. Sentence 1: Summarize the answer.
 3. Sentence 2: One specific strength. Start with "What have you done well is".
 4. Sentence 3: One actionable improvement. Start with "However".
 Constraint: Total response must be under 70 words. Respond ONLY with the 3 sentences.`
